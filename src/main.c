@@ -9,6 +9,24 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
+/**
+ * TODO: Actually handle unescaping. For now we're just removing
+ *       double quotes.
+ * */
+static char *unescape(const char *arg, size_t len)
+{
+    char *unescaped = calloc(len + 1, sizeof(char));
+    size_t uidx = 0;
+    for (size_t i = 0; i < len; i++) {
+        if (arg[i] != '"') {
+            unescaped[uidx] = arg[i];
+            ++uidx;
+        }
+    } 
+
+    return unescaped;
+}
+
 static char *__cur_arg = NULL;
 static char *get_arg(char *cmd)
 {
@@ -18,6 +36,8 @@ static char *get_arg(char *cmd)
         __cur_arg = cmd;
     }
 
+    size_t rem_len = strlen(__cur_arg);
+
     while (isspace(*__cur_arg)) {
         ++__cur_arg;
     }
@@ -25,8 +45,17 @@ static char *get_arg(char *cmd)
     /* Count length as long as current char is not null
      * or whitespace. */
     size_t len = 0;
-    while (__cur_arg[len] && !isspace(__cur_arg[len])) {
+    int in_quotes = 0;
+    while (__cur_arg[len] && (in_quotes || !isspace(__cur_arg[len])) && len < rem_len) {
+        if (__cur_arg[len] == '"')
+            in_quotes = !in_quotes;
+
         ++len;
+    }
+
+    /* Unclosed quotes */
+    if (in_quotes) {
+        printf("Double quotes unclosed!\n");
     }
 
     /* If length is 0, we have reached the end of the command. */
@@ -35,8 +64,10 @@ static char *get_arg(char *cmd)
         return NULL;
     }
 
-    char *arg = calloc(len + 1, sizeof(char));
-    strncpy(arg, __cur_arg, len);
+    // char *arg = calloc(len + 1, sizeof(char));
+    // strncpy(arg, __cur_arg, len);
+
+    char *arg = unescape(__cur_arg, len);
 
     __cur_arg += len;
 
@@ -54,6 +85,19 @@ Vec_t *parse(char *cmd)
     return argv;
 }
 
+int run_builtin(Vec_t *argv)
+{
+    if (strcmp(argv->v[0], "cd") == 0) {
+        printf("Got builtin command %s\n", argv->v[0]);
+    } else if (strcmp(argv->v[0], "alias") == 0) {
+        printf("Got builtin command %s\n", argv->v[0]);
+    } else {
+        return 0;
+    }
+
+    return 1;
+}
+
 int main(void)
 {
     char prompt[3] = "$ ";
@@ -65,6 +109,10 @@ int main(void)
     while ((cmd = readline(prompt))) {
         Vec_t *argv = parse(cmd);
         vec_print(argv);
+        if (run_builtin(argv)) {
+            printf("Ran builtin command.\n");
+        }
+
         free(cmd);
     }
 

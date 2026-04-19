@@ -1,5 +1,6 @@
 *.out
 sh
+*.o
 
 config.h
 config.status
@@ -8,3 +9,4 @@ Makefile
 stamp-h1
 
 autom4te.cache/
+.deps/

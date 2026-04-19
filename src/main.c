@@ -121,6 +121,7 @@ int main(void)
             case 0:
                 if (execvp(argv->v[0], argv->v)) {
                     perror("execvp");
+                    exit(EXIT_FAILURE);
                 }
 
                 break;

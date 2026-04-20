@@ -29,44 +29,73 @@ void yyerror(ASTNode_t **root, char const *e);
 %type <words> simple_command
 %type <ast_root> command_list
 %type <ast_root> pipeline
+%type <ast_root> input
 
+%precedence ';'
 %left '|'
 
 %%
 input:
-    %empty
-    | command_list
-    | pipeline
-    | pipeline ';' command_list
+    %empty { }
+    | command_list {
+        *root = $1;
+    }
+    | pipeline {
+        *root = $1;
+    }
+    | pipeline ';' command_list {
+        *root = $1;
+
+        ASTNode_t *cur = *root;
+        while (cur->right) {
+            cur = cur->right;
+        }
+
+        cur->right = $3;
+    }
     ;
 
 pipeline:
     simple_command '|' simple_command {
-        *root = ast_node_create(PIPELINE, NULL,
-                    ast_node_create(SIMPLE_COMMAND, $1, NULL, NULL),
-                    ast_node_create(SIMPLE_COMMAND, $3, NULL, NULL));
-
-        $$ = *root;
+        $$ = ast_node_create(
+            PIPELINE,
+            NULL,
+            ast_node_create(SIMPLE_COMMAND, $1, NULL, NULL),
+            ast_node_create(SIMPLE_COMMAND, $3, NULL, NULL)
+        );
     }
     | pipeline '|' simple_command {
-        ASTNode_t *new_node = ast_node_create(PIPELINE, NULL,
-                                $1, ast_node_create(SIMPLE_COMMAND, $3, NULL, NULL));
-        new_node->left = $1;
-        *root = new_node;
-        $$ = new_node;
+        $$ = ast_node_create(
+            PIPELINE,
+            NULL,
+            $1,
+            ast_node_create(SIMPLE_COMMAND, $3, NULL, NULL)
+        );
     }
+    ;
 
 command_list:
     simple_command {
-        *root = ast_node_create(SIMPLE_COMMAND, $1, NULL, NULL);
-        $$ = *root;
+        $$ = ast_node_create(SIMPLE_COMMAND, $1, NULL, NULL);
     }
     | command_list ';' simple_command {
-        ASTNode_t *new_command = ast_node_create(SIMPLE_COMMAND, $3, NULL, NULL);
-        $1->right = new_command;
-        $$ = new_command;
+        ASTNode_t *cur = $1;
+        while (cur->right) {
+            cur = cur->right;
+        }
+
+        cur->right = ast_node_create(SIMPLE_COMMAND, $3, NULL, NULL);
+        $$ = $1;
     }
-    | command_list ';' pipeline
+    | command_list ';' pipeline {
+        ASTNode_t *cur = $1;
+        while (cur->right) {
+            cur = cur->right;
+        }
+
+        cur->right = $3;
+        $$ = $1;
+    }
     | command_list ';'
     ;
 

@@ -101,7 +101,7 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_sh_OBJECTS = main.$(OBJEXT) vec.$(OBJEXT)
+am_sh_OBJECTS = main.$(OBJEXT) vec.$(OBJEXT) parse.$(OBJEXT)
 sh_OBJECTS = $(am_sh_OBJECTS)
 sh_LDADD = $(LDADD)
 sh_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(sh_LDFLAGS) $(LDFLAGS) -o \
@@ -121,7 +121,8 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/main.Po ./$(DEPDIR)/vec.Po
+am__depfiles_remade = ./$(DEPDIR)/main.Po ./$(DEPDIR)/parse.Po \
+	./$(DEPDIR)/vec.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -135,6 +136,14 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
+am__yacc_c2h = sed -e s/cc$$/hh/ -e s/cpp$$/hpp/ -e s/cxx$$/hxx/ \
+		   -e s/c++$$/h++/ -e s/c$$/h/
+YACCCOMPILE = $(YACC) $(AM_YFLAGS) $(YFLAGS)
+AM_V_YACC = $(am__v_YACC_@AM_V@)
+am__v_YACC_ = $(am__v_YACC_@AM_DEFAULT_V@)
+am__v_YACC_0 = @echo "  YACC    " $@;
+am__v_YACC_1 = 
+YLWRAP = $(top_srcdir)/ylwrap
 SOURCES = $(sh_SOURCES)
 DIST_SOURCES = $(sh_SOURCES)
 am__can_run_installinfo = \
@@ -159,7 +168,8 @@ am__define_uniq_tagged_files = \
   unique=`for i in $$list; do \
     if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
   done | $(am__uniquify_input)`
-am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/depcomp
+am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/depcomp \
+	$(top_srcdir)/ylwrap parse.c parse.h
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -206,6 +216,8 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 VERSION = @VERSION@
+YACC = @YACC@
+YFLAGS = @YFLAGS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -251,12 +263,13 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-sh_SOURCES = main.c vec.c vec.h
+AM_YFLAGS = -d -Wno-yacc
+sh_SOURCES = main.c vec.c vec.h parse.y
 sh_LDFLAGS = -lreadline
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .o .obj
+.SUFFIXES: .c .o .obj .y
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -328,6 +341,9 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-$(am__rm_f) $(bin_PROGRAMS)
+parse.h: parse.c
+	@if test ! -f $@; then rm -f parse.c; else :; fi
+	@if test ! -f $@; then $(MAKE) $(AM_MAKEFLAGS) parse.c; else :; fi
 
 sh$(EXEEXT): $(sh_OBJECTS) $(sh_DEPENDENCIES) $(EXTRA_sh_DEPENDENCIES) 
 	@rm -f sh$(EXEEXT)
@@ -340,6 +356,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parse.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vec.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
@@ -361,6 +378,9 @@ am--depfiles: $(am__depfiles_remade)
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.y.c:
+	$(AM_V_YACC)$(am__skipyacc) $(SHELL) $(YLWRAP) $< y.tab.c $@ y.tab.h `echo $@ | $(am__yacc_c2h)` y.output $*.output -- $(YACCCOMPILE)
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
@@ -484,12 +504,15 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-$(am__rm_f) parse.c
+	-$(am__rm_f) parse.h
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
 
 distclean: distclean-am
 	-rm -f ./$(DEPDIR)/main.Po
+	-rm -f ./$(DEPDIR)/parse.Po
 	-rm -f ./$(DEPDIR)/vec.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -537,6 +560,7 @@ installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/main.Po
+	-rm -f ./$(DEPDIR)/parse.Po
 	-rm -f ./$(DEPDIR)/vec.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic

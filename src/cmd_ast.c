@@ -9,8 +9,8 @@ ASTNode_t *ast_node_create(NodeType_t type, Vec_t *argv, ASTNode_t *left, ASTNod
     ASTNode_t *node = malloc(sizeof(ASTNode_t));
     node->type = type;
     node->argv = argv;
-    node->left = NULL;
-    node->right = NULL;
+    node->left = left;
+    node->right = right;
 
     return node;
 }
@@ -26,13 +26,22 @@ static void ast_print_real(ASTNode_t *root, int depth)
         printf("\t");
     }
 
-    printf("%s\n", root->argv->v[0]);
+    switch (root->type) {
+    case PIPELINE:
+        printf("PIPELINE\n");
+        break;
+
+    default:
+        printf("%s\n", root->argv->v[0]);
+    }
 
     if (root->left) {
+        printf("L ");
         ast_print_real(root->left, depth + 1);
     }
 
     if (root->right) {
+        printf("R ");
         ast_print_real(root->right, depth + 1);
     }
 }

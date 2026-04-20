@@ -41,6 +41,10 @@ void vec_print(Vec_t *vec)
 
 void vec_free(Vec_t *vec)
 {
+    if (!vec) {
+        return;
+    }
+
     for (size_t i = 0; i < vec->sz; i++) {
         free(vec->v[i]);
     }

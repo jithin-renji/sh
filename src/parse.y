@@ -28,6 +28,7 @@ void yyerror(ASTNode_t **root, char const *e);
 %token <word> WORD
 %type <words> simple_command
 %type <ast_root> command_list
+%type <ast_root> pipeline
 
 %left '|'
 
@@ -41,12 +42,18 @@ input:
 
 pipeline:
     simple_command '|' simple_command {
-        printf("simple_command | simple_command:\n");
-        vec_print($1);
-        vec_print($3);
+        *root = ast_node_create(PIPELINE, NULL,
+                    ast_node_create(SIMPLE_COMMAND, $1, NULL, NULL),
+                    ast_node_create(SIMPLE_COMMAND, $3, NULL, NULL));
+
+        $$ = *root;
     }
     | pipeline '|' simple_command {
-        printf("pipeline | simple_command:\n");
+        ASTNode_t *new_node = ast_node_create(PIPELINE, NULL,
+                                $1, ast_node_create(SIMPLE_COMMAND, $3, NULL, NULL));
+        new_node->left = $1;
+        *root = new_node;
+        $$ = new_node;
     }
 
 command_list:

@@ -2,6 +2,7 @@
 sh
 *.o
 
+configure~
 config.h
 config.status
 config.log

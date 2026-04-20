@@ -1,5 +1,9 @@
 #include "vec.h"
 
+#ifdef HAVE_CONFIG_H
+#   include <config.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,6 +13,13 @@
 #include <sys/wait.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+
+extern int yydebug;
+extern int yyparse(void);
+
+char *cur_cmd;
+char *cur_ch;
+
 
 /**
  * TODO: Actually handle unescaping. For now we're just removing
@@ -99,47 +110,56 @@ int run_builtin(Vec_t *argv)
     return 1;
 }
 
-int main(void)
+int main(int argc, const char *argv[])
 {
-    char prompt[3] = "$ ";
-    if (geteuid() == 0) {
-        prompt[0] = '#';
-    }
+    if (argc == 2 && strcmp(argv[1], "--debug") == 0)
+        yydebug = 1;
 
     char *cmd = NULL;
-    while ((cmd = readline(prompt))) {
-        Vec_t *argv = parse(cmd);
-        if (!argv->sz)
-            continue;
-
-        if (run_builtin(argv)) {
-            printf("Ran builtin command.\n");
-        } else {
-            pid_t pid = fork();
-            switch (pid) {
-            case -1:
-                perror("fork");
-                exit(EXIT_FAILURE);
-
-            case 0:
-                if (execvp(argv->v[0], argv->v)) {
-                    perror("execvp");
-                    exit(EXIT_FAILURE);
-                }
-
-                break;
-
-            /* Parent (shell) process */
-            default:
-                pid_t w = waitpid(pid, NULL, 0);
-                if (w == -1) {
-                    perror("waitpid");
-                }
-            }
-        }
-
+    while ((cmd = readline(PACKAGE_STRING "$ "))) {
+        cur_cmd = cmd;
+        cur_ch = cur_cmd;
+        yyparse();
         free(cmd);
     }
-
-    return 0;
 }
+
+// int main(void)
+// {
+//     char *cmd = NULL;
+//     while ((cmd = readline(PACKAGE_STRING "$ "))) {
+//         Vec_t *argv = parse(cmd);
+//         if (!argv->sz)
+//             continue;
+// 
+//         if (run_builtin(argv)) {
+//             printf("Ran builtin command.\n");
+//         } else {
+//             pid_t pid = fork();
+//             switch (pid) {
+//             case -1:
+//                 perror("fork");
+//                 exit(EXIT_FAILURE);
+// 
+//             case 0:
+//                 if (execvp(argv->v[0], argv->v)) {
+//                     perror("execvp");
+//                     exit(EXIT_FAILURE);
+//                 }
+// 
+//                 break;
+// 
+//             /* Parent (shell) process */
+//             default:
+//                 pid_t w = waitpid(pid, NULL, 0);
+//                 if (w == -1) {
+//                     perror("waitpid");
+//                 }
+//             }
+//         }
+// 
+//         free(cmd);
+//     }
+// 
+//     return 0;
+// }

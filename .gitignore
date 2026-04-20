@@ -1,6 +1,7 @@
 *.out
 sh
 *.o
+*.swp
 
 configure~
 config.h

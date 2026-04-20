@@ -495,16 +495,16 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  6
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   10
+#define YYLAST   15
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  6
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  5
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  12
+#define YYNRULES  13
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  15
+#define YYNSTATES  18
 
 /* YYMAXUTOK -- Last valid token kind.  */
 #define YYMAXUTOK   258
@@ -553,8 +553,8 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    22,    22,    23,    24,    28,    29,    32,    33,    34,
-      35,    39,    40
+       0,    24,    24,    25,    26,    27,    31,    32,    35,    36,
+      37,    38,    42,    43
 };
 #endif
 
@@ -595,8 +595,8 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -2,    -8,     3,     1,     5,     4,    -8,    -2,    -8,    -2,
-      -8,    -2,     6,     6,     6
+       0,    -8,     9,     1,     5,     4,    -8,     0,     0,     0,
+      -8,     0,     8,     5,     8,    10,     4,     8
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -604,14 +604,14 @@ static const yytype_int8 yypact[] =
    means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
-       2,    11,     0,     4,     3,     7,     1,     0,    10,     9,
-      12,     0,     6,     8,     5
+       2,    12,     0,     4,     3,     8,     1,     0,     0,    11,
+      13,     0,     7,     5,     8,    10,     9,     6
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -8,    -8,    -8,    -8,    -7
+      -8,    -8,     3,     7,    -7
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
@@ -625,14 +625,14 @@ static const yytype_int8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-      12,     1,    13,     6,    14,     7,     8,    10,    11,    10,
-       9
+      12,    14,    16,     1,    17,     7,     8,    10,    11,     6,
+       9,    10,    15,     0,     7,    13
 };
 
 static const yytype_int8 yycheck[] =
 {
-       7,     3,     9,     0,    11,     4,     5,     3,     4,     3,
-       5
+       7,     8,     9,     3,    11,     4,     5,     3,     4,     0,
+       5,     3,     9,    -1,     4,     8
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
@@ -640,21 +640,21 @@ static const yytype_int8 yycheck[] =
 static const yytype_int8 yystos[] =
 {
        0,     3,     7,     8,     9,    10,     0,     4,     5,     5,
-       3,     4,    10,    10,    10
+       3,     4,    10,     9,    10,     8,    10,    10
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
-       0,     6,     7,     7,     7,     8,     8,     9,     9,     9,
-       9,    10,    10
+       0,     6,     7,     7,     7,     7,     8,     8,     9,     9,
+       9,     9,    10,    10
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
-       0,     2,     0,     1,     1,     3,     3,     1,     3,     2,
-       2,     1,     2
+       0,     2,     0,     1,     1,     3,     3,     3,     1,     3,
+       3,     2,     1,     2
 };
 
 
@@ -1311,7 +1311,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 43 "parse.y"
+#line 46 "parse.y"
 
 
 int isreserved(char c)

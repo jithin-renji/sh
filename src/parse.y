@@ -17,11 +17,14 @@ void yyerror(char const *);
 %define api.value.type {char *}
 %token ARG
 
+%left '|'
+
 %%
 input:
     %empty
     | command_list
     | pipeline
+    | pipeline ';' command_list
     ;
 
 pipeline:
@@ -31,8 +34,8 @@ pipeline:
 command_list:
     simple_command
     | command_list ';' simple_command
+    | command_list ';' pipeline
     | command_list ';'
-    | pipeline ';'
     ;
 
 simple_command:

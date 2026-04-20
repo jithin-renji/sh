@@ -263,9 +263,10 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_YFLAGS = -d -Wno-yacc
+AM_YFLAGS = -d -Wno-yacc -Wcounterexamples
 sh_SOURCES = main.c vec.c vec.h parse.y
 sh_LDFLAGS = -lreadline
+CLEANFILES = parse.c parse.h
 all: all-am
 
 .SUFFIXES:
@@ -496,6 +497,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-$(am__rm_f) $(CLEANFILES)
 
 distclean-generic:
 	-$(am__rm_f) $(CONFIG_CLEAN_FILES)

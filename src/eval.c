@@ -1,6 +1,13 @@
 #include "eval.h"
 
+#ifdef HAVE_CONFIG_H
+#   include <config.h>
+#else
+#   error "Missing config.h"
+#endif
+
 #include <stdio.h>
+#include <errno.h>
 
 #include <unistd.h>
 #include <sys/wait.h>
@@ -44,8 +51,12 @@ static void run_simple_command(ASTNode_t *cmd, int read_end, int write_end)
         }
 
         execvp(cmd->argv->v[0], cmd->argv->v);
+        if (errno == ENOENT) {
+            fprintf(stderr, PACKAGE_NAME ": %s: command not found\n", cmd->argv->v[0]);
+        } else {
+            perror("execvp");
+        }
 
-        perror("execvp");
         exit(EXIT_FAILURE);
 
         break;
@@ -62,32 +73,27 @@ static void run_pipeline(ASTNode_t *root, ASTNode_t *parent, int next_write)
         exit(EXIT_FAILURE);
     }
 
-    if (root->left->type == SIMPLE_COMMAND && root->right->type == SIMPLE_COMMAND) {
-        int pfd[2];
-        if (pipe(pfd) == -1) {
-            perror("pipe");
-        }
+    int pfd[2];
+    if (pipe(pfd) == -1) {
+        perror("pipe");
+    }
 
+    if (root->left->type == SIMPLE_COMMAND && root->right->type == SIMPLE_COMMAND) {
         run_simple_command(root->left, NO_PIPE, pfd[WRITE_END]);
         close(pfd[WRITE_END]);
 
         run_simple_command(root->right, pfd[READ_END], next_write);
         close(pfd[READ_END]);
     } else if (root->left->type == PIPELINE) {
-        int next_pfd[2];
-        if (pipe(next_pfd) == -1) {
-            perror("pipe");
-        }
-
-        run_pipeline(root->left, root, next_pfd[WRITE_END]);
-        close(next_pfd[WRITE_END]);
+        run_pipeline(root->left, root, pfd[WRITE_END]);
+        close(pfd[WRITE_END]);
         if (parent) {
-            run_simple_command(root->right, next_pfd[READ_END], next_write);
+            run_simple_command(root->right, pfd[READ_END], next_write);
         } else {
-            run_simple_command(root->right, next_pfd[READ_END], NO_PIPE);
+            run_simple_command(root->right, pfd[READ_END], NO_PIPE);
         }
 
-        close(next_pfd[READ_END]);
+        close(pfd[READ_END]);
     }
 }
 

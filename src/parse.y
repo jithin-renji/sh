@@ -9,7 +9,6 @@
 
 #define YYDEBUG     1
 
-extern char *cur_cmd;
 extern char *cur_ch;
 
 int yylex(void);

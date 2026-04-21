@@ -111,6 +111,53 @@ int run_builtin(Vec_t *argv)
     return 1;
 }
 
+static void run_simple_command(ASTNode_t *cmd)
+{
+    if (cmd->type != SIMPLE_COMMAND) {
+        fprintf(stderr, "run_simple_command() called for cmd->type = %d\n", cmd->type);
+        abort();
+    }
+
+    pid_t pid = fork();
+    pid_t w;
+    int wstatus;
+    switch (pid) {
+    case -1:
+        perror("fork");
+        break;
+
+    case 0:
+        if (execvp(cmd->argv->v[0], cmd->argv->v) == -1) {
+            perror("execvp");
+        }
+
+        break;
+
+    default:
+        w = waitpid(pid, &wstatus, 0);
+    }
+}
+
+static void eval(ASTNode_t *root)
+{
+    if (!root) {
+        return;
+    }
+
+    if (root->left) {
+        eval(root->left);
+    }
+
+    if (root->right) {
+        eval(root->right);
+    }
+
+    switch (root->type) {
+    default:
+        run_simple_command(root);
+    }
+}
+
 int main(int argc, const char *argv[])
 {
     if (argc == 2 && strcmp(argv[1], "--debug") == 0)
@@ -123,6 +170,8 @@ int main(int argc, const char *argv[])
 
         ASTNode_t *root;
         yyparse(&root);
+
+        eval(root);
 
         ast_print(root);
         ast_free(root);

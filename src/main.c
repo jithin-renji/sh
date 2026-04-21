@@ -171,7 +171,7 @@ int main(int argc, const char *argv[])
         yydebug = 1;
 
     char *cmd = NULL;
-    while ((cmd = readline(PACKAGE_STRING "$ "))) {
+    while ((cmd = readline(PACKAGE_NAME "-" PACKAGE_VERSION "$ "))) {
         cur_cmd = cmd;
         cur_ch = cur_cmd;
 

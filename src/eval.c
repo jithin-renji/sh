@@ -38,6 +38,8 @@ static int run_builtin(ASTNode_t *cmd)
         } else {
             fprintf(stderr, "cd: too many arguments\n");
         }
+    } else if (strcmp(argv[0], "exit") == 0) {
+        exit(EXIT_SUCCESS);
     } else {
         return -1;
     }

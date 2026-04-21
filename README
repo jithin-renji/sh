@@ -1,1 +1,3 @@
-sh - Basic shell for ClaireOS
+sh - Fast Unix Shell
+
+Currently supports command lists and pipelines.

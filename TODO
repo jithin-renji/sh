@@ -1,5 +1,11 @@
 TODO
 
+[ ] Builtins
+    [ ] cd
+    [ ] exec
+    [ ] exit
+    [ ] alias
+    [ ] export
 [ ] Quoting (eg. ls "directory with spaces")
 [ ] Comments (# Some comment)
 [ ] IO Redirection (echo Something > file.txt; cat < file.txt; somecommand 2>&1 | sort)

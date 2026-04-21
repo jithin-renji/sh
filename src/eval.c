@@ -1,4 +1,5 @@
 #include "eval.h"
+#include "builtins.h"
 
 #ifdef HAVE_CONFIG_H
 #   include <config.h>
@@ -18,6 +19,7 @@
 #define READ_END        0
 #define WRITE_END       1
 
+
 static int run_builtin(ASTNode_t *cmd)
 {
     if (cmd->type != SIMPLE_COMMAND) {
@@ -25,24 +27,12 @@ static int run_builtin(ASTNode_t *cmd)
         exit(EXIT_FAILURE);
     }
 
-    char **argv = cmd->argv->v;
-    if (strcmp(argv[0], "cd") == 0) {
-        if (cmd->argv->sz == 1) {
-            if (chdir(getenv("HOME")) == -1) {
-                perror("cd");
-            }
-        } else if (cmd->argv->sz == 2) {
-            if (chdir(argv[1]) == -1) {
-                perror("cd");
-            }
-        } else {
-            fprintf(stderr, "cd: too many arguments\n");
-        }
-    } else if (strcmp(argv[0], "exit") == 0) {
-        exit(EXIT_SUCCESS);
-    } else {
+    Builtin_t builtin = get_builtin(cmd->argv->v[0]);
+    if (!builtin.action) {
         return -1;
     }
+
+    builtin.action(cmd->argv);
 
     return 0;
 }

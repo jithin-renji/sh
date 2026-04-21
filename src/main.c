@@ -119,8 +119,14 @@ int main(int argc, const char *argv[])
     if (argc == 2 && strcmp(argv[1], "--debug") == 0)
         yydebug = 1;
 
+    using_history();
+
     char *cmd = NULL;
     while ((cmd = readline(PACKAGE_NAME "-" PACKAGE_VERSION "$ "))) {
+        if (*cmd) {
+            add_history(cmd);
+        }
+
         cur_cmd = cmd;
         cur_ch = cur_cmd;
 

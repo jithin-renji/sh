@@ -1,0 +1,7 @@
+TODO
+
+[ ] Quoting (eg. ls "directory with spaces")
+[ ] Comments (# Some comment)
+[ ] IO Redirection (echo Something > file.txt; cat < file.txt; somecommand 2>&1 | sort)
+[ ] Async commands
+[ ] Minimal readline-like library/code just for this shell

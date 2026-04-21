@@ -84,6 +84,7 @@ command_list:
     | command_list ';' pipeline {
         $$ = ast_node_create(COMMAND_LIST, NULL, $1, $3);
     }
+    | pipeline ';'
     | command_list ';'
     ;
 

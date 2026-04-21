@@ -31,8 +31,8 @@ void yyerror(ASTNode_t **root, char const *e);
 %type <ast_root> pipeline
 %type <ast_root> input
 
-%precedence ';'
 %left '|'
+%precedence ';'
 
 %%
 input:
@@ -44,14 +44,7 @@ input:
         *root = $1;
     }
     | pipeline ';' command_list {
-        *root = $1;
-
-        ASTNode_t *cur = *root;
-        while (cur->right) {
-            cur = cur->right;
-        }
-
-        cur->right = $3;
+        *root = ast_node_create(COMMAND_LIST, NULL, $1, $3);
     }
     ;
 

@@ -6,7 +6,8 @@
 #include <sys/wait.h>
 
 #define NO_PIPE         -1
-#define CREATE_END      -2
+#define READ_END        0
+#define WRITE_END       1
 
 static void run_simple_command(ASTNode_t *cmd, int read_end, int write_end)
 {
@@ -42,10 +43,10 @@ static void run_simple_command(ASTNode_t *cmd, int read_end, int write_end)
             close(write_end);
         }
 
-        if (execvp(cmd->argv->v[0], cmd->argv->v) == -1) {
-            perror("execvp");
-            exit(EXIT_FAILURE);
-        }
+        execvp(cmd->argv->v[0], cmd->argv->v);
+
+        perror("execvp");
+        exit(EXIT_FAILURE);
 
         break;
 
@@ -67,26 +68,26 @@ static void run_pipeline(ASTNode_t *root, ASTNode_t *parent, int next_write)
             perror("pipe");
         }
 
-        run_simple_command(root->left, NO_PIPE, pfd[1]);
-        close(pfd[1]);
+        run_simple_command(root->left, NO_PIPE, pfd[WRITE_END]);
+        close(pfd[WRITE_END]);
 
-        run_simple_command(root->right, pfd[0], next_write);
-        close(pfd[0]);
+        run_simple_command(root->right, pfd[READ_END], next_write);
+        close(pfd[READ_END]);
     } else if (root->left->type == PIPELINE) {
         int next_pfd[2];
         if (pipe(next_pfd) == -1) {
             perror("pipe");
         }
 
-        run_pipeline(root->left, root, next_pfd[1]);
-        close(next_pfd[1]);
+        run_pipeline(root->left, root, next_pfd[WRITE_END]);
+        close(next_pfd[WRITE_END]);
         if (parent) {
-            run_simple_command(root->right, next_pfd[0], next_write);
+            run_simple_command(root->right, next_pfd[READ_END], next_write);
         } else {
-            run_simple_command(root->right, next_pfd[0], NO_PIPE);
+            run_simple_command(root->right, next_pfd[READ_END], NO_PIPE);
         }
 
-        close(next_pfd[0]);
+        close(next_pfd[READ_END]);
     }
 }
 

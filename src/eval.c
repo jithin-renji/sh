@@ -41,6 +41,11 @@ static Proc_t *eval_simple_command(ASTNode_t *cmd)
         exit(EXIT_FAILURE);
     }
 
+    if (eval_builtin(cmd) == 0) {
+        return NULL;
+    }
+
+
     return proc_create(cmd->argv);
 }
 
@@ -67,10 +72,6 @@ static void eval_pipeline(ASTNode_t *root, Pipeline_t *pipeline)
 void eval(ASTNode_t *root)
 {
     if (!root) {
-        return;
-    }
-
-    if (eval_builtin(root) == 0) {
         return;
     }
 
@@ -101,7 +102,9 @@ void eval(ASTNode_t *root)
 
     default:
         Proc_t *proc = eval_simple_command(root);
-        pipeline_exec(proc);
-        pipeline_free(proc);
+        if (proc) {
+            pipeline_exec(proc);
+            pipeline_free(proc);
+        }
     }
 }

@@ -110,7 +110,7 @@ void proc_exec(Proc_t *proc, pid_t pgrp, int read_fd, int write_fd)
     exit(EXIT_FAILURE);
 }
 
-void pipeline_exec(Pipeline_t *pipeline)
+void job_create(Pipeline_t *pipeline, int is_foreground)
 {
     int read_fd = STDIN_FILENO;
     int write_fd = STDOUT_FILENO;
@@ -163,11 +163,13 @@ void pipeline_exec(Pipeline_t *pipeline)
     }
 
     int wstatus;
-    if (waitpid(-pgrp, &wstatus, 0) == -1 && errno != ECHILD) {
+    if (waitpid(-pgrp, &wstatus, WUNTRACED) == -1 && errno != ECHILD) {
         perror("waitpid");
     }
 
-    /* TODO: Detect stopped children */
+    if (WIFSTOPPED(wstatus)) {
+        fprintf(stderr, "Stopped.\nRun 'bg' to send this job to the background or 'fg' to bring it back to the foreground.\n");
+    }
 
     tcsetpgrp(STDIN_FILENO, getpgrp());
 }

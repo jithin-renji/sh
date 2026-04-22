@@ -78,7 +78,7 @@ void eval(ASTNode_t *root)
     if (root->type == PIPELINE) {
         Pipeline_t *pipeline = pipeline_create();
         eval_pipeline(root, pipeline);
-        pipeline_exec(pipeline);
+        job_create(pipeline, 1);
 
         pipeline_free(pipeline);
         return;
@@ -103,7 +103,7 @@ void eval(ASTNode_t *root)
     default:
         Proc_t *proc = eval_simple_command(root);
         if (proc) {
-            pipeline_exec(proc);
+            job_create(proc, 1);
             pipeline_free(proc);
         }
     }

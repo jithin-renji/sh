@@ -27,7 +27,6 @@ char *cur_ch;
 
 void ignore_interactive_signals(void)
 {
-    rl_catch_signals = 0;
     signal(SIGINT, SIG_IGN);
     signal(SIGQUIT, SIG_IGN);
     signal(SIGTSTP, SIG_IGN);
@@ -47,6 +46,7 @@ int main(int argc, const char *argv[])
 
     if (tcsetpgrp(STDIN_FILENO, sh_pgid) == -1) {
         perror("tcsetpgrp:");
+        exit(EXIT_FAILURE);
     }
 
     if (argc == 2 && strcmp(argv[1], "--debug") == 0)

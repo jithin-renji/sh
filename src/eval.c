@@ -70,6 +70,10 @@ void eval(ASTNode_t *root)
         return;
     }
 
+    if (eval_builtin(root) == 0) {
+        return;
+    }
+
     if (root->type == PIPELINE) {
         Pipeline_t *pipeline = pipeline_create();
         eval_pipeline(root, pipeline);

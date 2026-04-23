@@ -22,6 +22,61 @@ static void job_add(Job_t *job)
     }
 }
 
+static void job_remove(Job_t *job)
+{
+    Job_t *cur = jobs;
+    while (cur) {
+        if (cur->next == job) {
+            cur->next = job->next;
+            job_free(job);
+            break;
+        } else if (cur == job) {
+            job_free(job);
+            jobs = NULL;
+            break;
+        }
+
+        cur = cur->next;
+    }
+}
+
+void job_wait(Job_t *job)
+{
+    int wstatus;
+    pid_t pid = waitpid(-job->pgrp, &wstatus, WUNTRACED);
+    if (pid == -1) {
+        if (errno != ECHILD) {
+            perror("waitpid");
+        }
+
+        job_remove(job);
+    } else {
+        if (WIFSTOPPED(wstatus)) {
+            printf("\n[%ld] Stopped\n"
+                   "Run 'bg' to send this job to the background.\n"
+                   "Run 'fg' to bring this job back to the foreground.\n", job->id);
+        } else if (WIFEXITED(wstatus)) {
+            job_remove(job);
+        }
+    }
+
+    tcsetpgrp(STDIN_FILENO, getpgrp());
+}
+
+int job_fg(Job_t *job)
+{
+    if (kill(-job->pgrp, SIGCONT) == -1) {
+        perror("Unable to resume job");
+        return -1;
+    }
+
+    fprintf(stderr, "%s\n", jobs->cmdline);
+    tcsetpgrp(STDIN_FILENO, job->pgrp);
+    job_wait(job);
+
+    return 0;
+}
+
 void job_create(Pipeline_t *pipeline, int is_foreground)
 {
     int read_fd = STDIN_FILENO;
@@ -74,42 +129,34 @@ void job_create(Pipeline_t *pipeline, int is_foreground)
         read_fd = pfd[0];
     }
 
+    Job_t *job = malloc(sizeof(Job_t));
+    job->id = next_job_id;
+    job->cmdline = strdup(pipeline->argv->v[0]);
+    job->pipeline = pipeline;
+    job->pgrp = pgrp;
+    job->is_foreground = 0;
+    job->is_running = 0;
+    job->next = NULL;
 
-    int wstatus;
-    if (waitpid(-pgrp, &wstatus, WUNTRACED) == -1 && errno != ECHILD) {
-        perror("waitpid");
-    }
+    job_add(job);
+    next_job_id++;
 
-    if (WIFSTOPPED(wstatus)) {
-        Job_t *job = malloc(sizeof(Job_t));
-        job->id = next_job_id;
-        job->cmdline = strdup(pipeline->argv->v[0]);
-        job->pipeline = pipeline;
-        job->pgrp = pgrp;
-        job->is_foreground = 0;
-        job->is_running = 0;
-        job->next = NULL;
+    job_wait(job);
+}
 
-        job_add(job);
-        fprintf(stderr, "\n[%ld] Stopped.\n"
-                "Run 'bg' to send this job to the background or 'fg' to bring it back to the foreground.\n", job->id);
-
-        next_job_id++;
-    }
-
-    tcsetpgrp(STDIN_FILENO, getpgrp());
+void job_free(Job_t *job)
+{
+    free(job->cmdline);
+    pipeline_free(job->pipeline);
+    free(job);
 }
 
 void jobs_free(void)
 {
     Job_t *cur = jobs;
     while (cur) {
-        free(cur->cmdline);
-        pipeline_free(cur->pipeline);
-
         Job_t *next = cur->next;
-        free(cur);
-
+        job_free(cur);
         cur = next;
     }
 }

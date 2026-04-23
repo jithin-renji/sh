@@ -8,11 +8,14 @@
 
 static int change_working_dir(Vec_t *argv);
 static int show_job_list(Vec_t *argv);
+static int bring_job_foreground(Vec_t *argv);
+static int send_job_background(Vec_t *argv);
 static int exit_shell(Vec_t *argv);
 
 Builtin_t builtins[NUM_BUILTINS + 1] = {
     { "cd", change_working_dir },
     { "jobs", show_job_list },
+    { "fg", bring_job_foreground },
     { "exit", exit_shell },
     { "", NULL }
 };
@@ -61,6 +64,22 @@ static int show_job_list(Vec_t *argv)
         cur = cur->next;
     }
 
+    return 0;
+}
+
+static int bring_job_foreground(Vec_t *argv)
+{
+    Job_t *job = jobs;
+    if (!job) {
+        fprintf(stderr, "No stopped jobs to bring to the foreground.\n");
+        return -1;
+    }
+
+    return job_fg(job);
+}
+
+static int send_job_background(Vec_t *argv)
+{
     return 0;
 }
 

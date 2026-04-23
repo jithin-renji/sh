@@ -123,8 +123,6 @@ static void job_add(Job_t *job)
         job->next = jobs;
         jobs = job;
     }
-
-    job->cmdline = strdup(job->pipeline->argv->v[0]);
 }
 
 void job_create(Pipeline_t *pipeline, int is_foreground)
@@ -188,6 +186,7 @@ void job_create(Pipeline_t *pipeline, int is_foreground)
     if (WIFSTOPPED(wstatus)) {
         Job_t *job = malloc(sizeof(Job_t));
         job->id = next_job_id;
+        job->cmdline = strdup(pipeline->argv->v[0]);
         job->pipeline = pipeline;
         job->pgrp = pgrp;
         job->is_foreground = 1;
@@ -195,7 +194,7 @@ void job_create(Pipeline_t *pipeline, int is_foreground)
         job->next = NULL;
 
         job_add(job);
-        fprintf(stderr, "[%ld] Stopped.\n"
+        fprintf(stderr, "\n[%ld] Stopped.\n"
                 "Run 'bg' to send this job to the background or 'fg' to bring it back to the foreground.\n", job->id);
 
         next_job_id++;
@@ -210,8 +209,10 @@ void jobs_free(void)
     while (cur) {
         free(cur->cmdline);
         pipeline_free(cur->pipeline);
-        cur = cur->next;
 
+        Job_t *next = cur->next;
         free(cur);
+
+        cur = next;
     }
 }

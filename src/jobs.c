@@ -49,6 +49,8 @@ void job_wait(Job_t *job)
             printf("\n[%ld] Stopped\n"
                    "Run 'bg' to send this job to the background.\n"
                    "Run 'fg' to bring this job back to the foreground.\n", job->id);
+            job->is_foreground = 0;
+            job->is_running = 0;
             break;
         } else if (WIFSIGNALED(wstatus)) {
             printf("\n[%ld] Terminated (signal %d)\n", job->id, WTERMSIG(wstatus));
@@ -145,8 +147,8 @@ void job_create(Pipeline_t *pipeline, int is_foreground)
     job->cmdline = strdup(pipeline->argv->v[0]);
     job->pipeline = pipeline;
     job->pgrp = pgrp;
-    job->is_foreground = 0;
-    job->is_running = 0;
+    job->is_foreground = 1;
+    job->is_running = 1;
     job->next = NULL;
 
     job_add(job);

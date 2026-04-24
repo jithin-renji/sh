@@ -13,6 +13,7 @@ TODO
     [ ] Job control
         [x] jobs 
         [x] fg, bg (most recent job)
-        [ ] SIGCHLD handler to reap completed
+        [x] SIGCHLD handler to reap completed
             bg processes.
+        [ ] Arbitrary job fg bg
 [ ] Minimal readline-like library/code just for this shell

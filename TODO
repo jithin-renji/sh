@@ -10,4 +10,9 @@ TODO
 [ ] Comments (# Some comment)
 [ ] IO Redirection (echo Something > file.txt; cat < file.txt; somecommand 2>&1 | sort)
 [ ] Async commands
+    [ ] Job control
+        [x] jobs 
+        [x] fg, bg (most recent job)
+        [ ] SIGCHLD handler to reap completed
+            bg processes.
 [ ] Minimal readline-like library/code just for this shell

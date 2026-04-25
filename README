@@ -1,3 +1,3 @@
 clara - Fast Unix Shell
 
-Currently supports command lists, pipelines, and minimal job control.
+Currently supports command lists, pipelines, and job control.

@@ -187,7 +187,7 @@ int job_bg(Job_t *job)
         return -1;
     }
 
-    fprintf(stderr, "\n[%ld] %s &\n", jobs->id, jobs->cmdline);
+    fprintf(stderr, "\n[%ld] %s &\n", job->id, job->cmdline);
     job->is_foreground = 0;
     job->is_running = 1;
 

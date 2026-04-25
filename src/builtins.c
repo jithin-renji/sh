@@ -70,10 +70,21 @@ static int show_job_list(Vec_t *argv)
 
 static int bring_job_foreground(Vec_t *argv)
 {
-    Job_t *job = jobs;
-    if (!job) {
-        fprintf(stderr, "No stopped jobs to bring to the foreground.\n");
-        return -1;
+    Job_t *job = NULL;
+    if (argv->sz == 1) {
+        job = jobs;
+        if (!job) {
+            fprintf(stderr, "No stopped jobs to bring to the foreground.\n");
+            return -1;
+        }
+    } else if (argv->sz == 2) {
+        errno = 0;
+        long jid = strtol(argv->v[1], NULL, 10);
+        job = job_find(jid);
+        if (!job) {
+            fprintf(stderr, "No job with id %ld\n", jid);
+            return -1;
+        }
     }
 
     return job_fg(job);
@@ -81,10 +92,21 @@ static int bring_job_foreground(Vec_t *argv)
 
 static int send_job_background(Vec_t *argv)
 {
-    Job_t *job = jobs;
-    if (!job) {
-        fprintf(stderr, "No stopped jobs to send to the background.\n");
-        return -1;
+    Job_t *job = NULL;
+    if (argv->sz == 1) {
+        job = jobs;
+        if (!job) {
+            fprintf(stderr, "No stopped jobs to send to the background.\n");
+            return -1;
+        }
+    } else if (argv->sz == 2) {
+        errno = 0;
+        long jid = strtol(argv->v[1], NULL, 10);
+        job = job_find(jid);
+        if (!job) {
+            fprintf(stderr, "No job with id %ld\n", jid);
+            return -1;
+        }
     }
 
     return job_bg(job);

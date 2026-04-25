@@ -82,6 +82,17 @@ void job_wait(Job_t *job)
     tcsetpgrp(STDIN_FILENO, getpgrp());
 }
 
+Job_t *job_find(size_t jid)
+{
+    for (Job_t *cur = jobs; cur; cur = cur->next) {
+        if (cur->id == jid) {
+            return cur;
+        }
+    }
+
+    return NULL;
+}
+
 Job_t *job_find_by_pid(pid_t pid)
 {
     Job_t *cur = jobs;
@@ -159,7 +170,7 @@ int job_fg(Job_t *job)
         return -1;
     }
 
-    fprintf(stderr, "%s\n", jobs->cmdline);
+    fprintf(stderr, "%s\n", job->cmdline);
     job->is_foreground = 1;
     job->is_running = 1;
 

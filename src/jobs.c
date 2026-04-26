@@ -47,7 +47,6 @@ void job_wait(Job_t *job)
 {
     int wstatus;
     pid_t pid;
-    int should_remove_job = 1;
     while ((pid = waitpid(-job->pgrp, &wstatus, WUNTRACED)) > 0) {
         if (WIFSTOPPED(wstatus)) {
             printf("\n[%ld] Stopped\n"
@@ -68,7 +67,6 @@ void job_wait(Job_t *job)
             proc->completed = 1;
             if (job_is_completed(job)) {
                 job_remove(job);
-                should_remove_job = 0;
             }
         }
     }

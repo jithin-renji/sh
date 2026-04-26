@@ -2,6 +2,7 @@
 #include "cmd_ast.h"
 #include "eval.h"
 #include "jobs.h"
+#include "colors.h"
 
 #ifdef HAVE_CONFIG_H
 #   include <config.h>
@@ -26,6 +27,8 @@ extern int yyparse(ASTNode_t **root);
 char *cur_cmd;
 char *cur_ch;
 
+int interactive;
+
 void ignore_interactive_signals(void)
 {
     signal(SIGINT, SIG_IGN);
@@ -37,25 +40,31 @@ void ignore_interactive_signals(void)
 
 void clara_init(void)
 {
-    pid_t clara_pgid;
-    while (tcgetpgrp(STDIN_FILENO) != (clara_pgid = getpgrp())) {
-        kill(-clara_pgid, SIGTTIN);
+    if (isatty(STDIN_FILENO)) {
+        interactive = 1;
     }
 
-    ignore_interactive_signals();
-    signal(SIGCHLD, reap_completed_bg_procs);
+    if (interactive) {
+        pid_t clara_pgid;
+        while (tcgetpgrp(STDIN_FILENO) != (clara_pgid = getpgrp())) {
+            kill(-clara_pgid, SIGTTIN);
+        }
 
-    clara_pgid = getpid();
-    if (getpgrp() != clara_pgid) {
-        if (setpgid(clara_pgid, clara_pgid) == -1) {
-            perror("Unable to create shell process group");
+        ignore_interactive_signals();
+        signal(SIGCHLD, reap_completed_bg_procs);
+
+        clara_pgid = getpid();
+        if (getpgrp() != clara_pgid) {
+            if (setpgid(clara_pgid, clara_pgid) == -1) {
+                perror("Unable to create shell process group");
+                exit(EXIT_FAILURE);
+            }
+        }
+
+        if (tcsetpgrp(STDIN_FILENO, clara_pgid) == -1) {
+            perror("Unable to set foreground");
             exit(EXIT_FAILURE);
         }
-    }
-
-    if (tcsetpgrp(STDIN_FILENO, clara_pgid) == -1) {
-        perror("Unable to set foreground");
-        exit(EXIT_FAILURE);
     }
 }
 
@@ -69,7 +78,9 @@ int main(int argc, const char *argv[])
     using_history();
 
     char *cmd = NULL;
-    while ((cmd = readline(PACKAGE_NAME "-" PACKAGE_VERSION "$ "))) {
+
+    /* TODO: Remove hardcoded colors and add proper user-configurable prompt support */
+    while ((cmd = readline(GREEN PACKAGE_NAME "-" PACKAGE_VERSION "$ " RESET))) {
         if (*cmd) {
             add_history(cmd);
         }

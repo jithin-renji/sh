@@ -87,11 +87,13 @@ static void eval_pipeline(ASTNode_t *root, Pipeline_t *pipeline)
     if (root->left->type == PIPELINE) {
         eval_pipeline(root->left, pipeline);
     } else if (root->left->type == SIMPLE_COMMAND) {
+        eval_env_vars(root->left);
         Proc_t *proc = proc_create(root->left->argv);
         pipeline_append(pipeline, proc);
     }
 
     if (root->right->type == SIMPLE_COMMAND) {
+        eval_env_vars(root->right);
         Proc_t *proc = proc_create(root->right->argv);
         pipeline_append(pipeline, proc);
     }

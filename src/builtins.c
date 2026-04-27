@@ -1,5 +1,6 @@
 #include "builtins.h"
 #include "jobs.h"
+#include "env.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -53,6 +54,10 @@ static int change_working_dir(Vec_t *argv)
         fprintf(stderr, "cd: too many arguments\n");
         return -1;
     }
+
+    char *new_wd = getcwd(NULL, 0);
+    env_set("PWD", new_wd);
+    free(new_wd);
 
     return 0;
 }

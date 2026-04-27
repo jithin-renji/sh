@@ -21,6 +21,7 @@ typedef struct EnvList
 
 void env_init(const char *envp[]);
 char *env_get(const char *name);
+void env_set(const char *var, const char *val);
 void env_append(const char *var, const char *val);
 void env_print(void);
 void env_free(void);

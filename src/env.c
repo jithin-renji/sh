@@ -33,6 +33,23 @@ void env_init(const char *envp[])
     }
 }
 
+void env_set(const char *var, const char *val)
+{
+    int idx = -1;
+    for (int i = 0; i < env_list->sz; i++) {
+        if (strcmp(env_list[i].pair.var, var) == 0) {
+            idx = i;
+        }
+    }
+
+    if (idx == -1) {
+        return;
+    }
+
+    free(env_list[idx].pair.val);
+    env_list[idx].pair.val = strdup(val);
+}
+
 char *env_get(const char *name)
 {
     for (int i = 0; i < env_list->sz; i++) {

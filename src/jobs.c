@@ -7,6 +7,7 @@
 
 #include <unistd.h>
 #include <sys/wait.h>
+#include <fcntl.h>
 
 Job_t *jobs = NULL;
 static size_t next_job_id = 0;
@@ -199,6 +200,7 @@ void job_create(Pipeline_t *pipeline, int is_foreground)
 
     int read_fd = STDIN_FILENO;
     int write_fd = STDOUT_FILENO;
+    int pipe_created = 0;
     pid_t pgrp = 0;
     for (Proc_t *proc = pipeline; proc; proc = proc->next) {
         int pfd[2];
@@ -208,11 +210,26 @@ void job_create(Pipeline_t *pipeline, int is_foreground)
                 break;
             }
 
+            pipe_created = 1;
             write_fd = pfd[1];
         } else {
             /* Reset write_fd since it may have been overwritten by
              * previous processes. */
             write_fd = STDOUT_FILENO;
+        }
+
+        if (proc->out_fname) {
+            write_fd = open(proc->out_fname, O_WRONLY | O_TRUNC | O_CREAT,
+                    0644);
+            if (write_fd == -1) {
+                perror("open");
+                break;
+            }
+
+            if (pipe_created) {
+                close(pfd[1]);
+                pipe_created = 0;
+            }
         }
 
         pid_t pid = fork();

@@ -82,6 +82,7 @@ int main(int argc, const char *argv[], const char *envp[])
     clara_init();
     env_init(envp);
     init_wd();
+    printf("DEBUG\n");
 
     if (argc == 2 && strcmp(argv[1], "--debug") == 0)
         yydebug = 1;

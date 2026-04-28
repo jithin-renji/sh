@@ -64,13 +64,22 @@ Proc_t *proc_find(Proc_t *pipeline, pid_t pid)
 void pipeline_append(Pipeline_t *pipeline, Proc_t *proc)
 {
     Proc_t *cur = pipeline;
-    while (cur) {
-        if (!cur->next) {
-            cur->next = proc;
-            break;
-        }
+    if (!cur->argv) {
+        cur->argv = proc->argv;
+        cur->in_fname = proc->in_fname;
+        cur->out_fname = proc->out_fname;
+        cur->outfile_append = proc->outfile_append;
+        cur->pid = proc->pid;
+        cur->completed = proc->completed;
+    } else {
+        while (cur) {
+            if (!cur->next) {
+                cur->next = proc;
+                break;
+            }
 
-        cur = cur->next;
+            cur = cur->next;
+        }
     }
 }
 

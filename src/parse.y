@@ -47,7 +47,7 @@ input:
         *root = $1;
     }
     | pipeline ';' command_list {
-        *root = ast_node_create(COMMAND_LIST, NULL, $1, $3);
+        *root = ast_node_create(COMMAND_LIST, NULL, NULL, NULL, 0, $1, $3);
     }
     ;
 
@@ -56,34 +56,50 @@ pipeline:
         $$ = ast_node_create(
             PIPELINE,
             NULL,
-            ast_node_create(SIMPLE_COMMAND, $1, NULL, NULL),
-            ast_node_create(SIMPLE_COMMAND, $3, NULL, NULL)
+            NULL, NULL, 0,
+            ast_node_create(SIMPLE_COMMAND, $1, NULL, NULL, 0, NULL, NULL),
+            ast_node_create(SIMPLE_COMMAND, $3, NULL, NULL, 0, NULL, NULL)
         );
     }
     | pipeline '|' simple_command {
         $$ = ast_node_create(
             PIPELINE,
             NULL,
+            NULL, NULL, 0,
             $1,
-            ast_node_create(SIMPLE_COMMAND, $3, NULL, NULL)
+            ast_node_create(SIMPLE_COMMAND, $3, NULL, NULL, 0, NULL, NULL)
         );
     }
     ;
 
 command_list:
     simple_command {
-        $$ = ast_node_create(SIMPLE_COMMAND, $1, NULL, NULL);
+        $$ = ast_node_create(SIMPLE_COMMAND, $1, NULL, NULL, 0, NULL, NULL);
+    }
+    | simple_command '>' WORD {
+        printf("File redirection detected\n");
+        $$ = ast_node_create(SIMPLE_COMMAND, $1, NULL, $3, 0, NULL, NULL);
     }
     | command_list ';' simple_command {
         $$ = ast_node_create(
             COMMAND_LIST,
             NULL,
+            NULL, NULL, 0,
             $1,
-            ast_node_create(SIMPLE_COMMAND, $3, NULL, NULL)
+            ast_node_create(SIMPLE_COMMAND, $3, NULL, NULL, 0, NULL, NULL)
+        );
+    }
+    | command_list ';' simple_command '>' WORD {
+        $$ = ast_node_create(
+            COMMAND_LIST,
+            NULL,
+            NULL, NULL, 0,
+            $1,
+            ast_node_create(SIMPLE_COMMAND, $3, NULL, $5, 0, NULL, NULL)
         );
     }
     | command_list ';' pipeline {
-        $$ = ast_node_create(COMMAND_LIST, NULL, $1, $3);
+        $$ = ast_node_create(COMMAND_LIST, NULL, NULL, NULL, 0, $1, $3);
     }
     | pipeline ';'
     | command_list ';'
@@ -104,11 +120,12 @@ async_command:
     simple_command '&' {
         $$ = ast_node_create(
             ASYNC_COMMAND, NULL,
-            ast_node_create(SIMPLE_COMMAND, $1, NULL, NULL), NULL
+            NULL, NULL, 0,
+            ast_node_create(SIMPLE_COMMAND, $1, NULL, NULL, 0, NULL, NULL), NULL
         ); 
     }
     | pipeline '&' {
-        $$ = ast_node_create(ASYNC_COMMAND, NULL, $1, NULL);
+        $$ = ast_node_create(ASYNC_COMMAND, NULL, NULL, NULL, 0, $1, NULL);
     }
 
 %%

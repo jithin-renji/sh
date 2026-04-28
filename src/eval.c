@@ -141,6 +141,9 @@ void eval(ASTNode_t *root)
         break;
 
     default:
+        if (root->out_fname) {
+            printf("Got file: %s\n", root->out_fname);
+        }
         proc = eval_simple_command(root);
         if (proc) {
             job_create(proc, 1);

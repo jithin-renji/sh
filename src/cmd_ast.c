@@ -4,11 +4,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-ASTNode_t *ast_node_create(NodeType_t type, Vec_t *argv, ASTNode_t *left, ASTNode_t *right)
+ASTNode_t *ast_node_create(NodeType_t type, Vec_t *argv, char *in_fname, char *out_fname,
+        int outfile_append, ASTNode_t *left, ASTNode_t *right)
 {
     ASTNode_t *node = malloc(sizeof(ASTNode_t));
     node->type = type;
     node->argv = argv;
+    node->in_fname = in_fname;
+    node->out_fname = out_fname;
+    node->outfile_append = outfile_append;
     node->left = left;
     node->right = right;
 

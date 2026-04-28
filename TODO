@@ -1,5 +1,7 @@
 TODO
 
+[ ] Fix zombies when running this command (for example):
+    ls | grep conf | grep config | grep .h | grep .in | wc -l &
 [ ] Builtins
     [x] cd
     [ ] exec

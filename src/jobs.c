@@ -128,16 +128,14 @@ void reap_completed_bg_procs(int s)
         if (WIFEXITED(wstatus)) {
             if (job && !job->is_foreground && job_is_completed(job)) {
                 fprintf(stderr, "\n[%ld] Exited\n", job->id);
+                break;
             }
-
-            break;
         } else if (WIFSIGNALED(wstatus)) {
             int s = WTERMSIG(wstatus);
             if (job && job_is_completed(job)) {
                 fprintf(stderr, "\n[%ld] Terminated (signal %d)\n", job->id, s);
+                break;
             }
-
-            break;
         }
     }
 

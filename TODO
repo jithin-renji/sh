@@ -1,7 +1,5 @@
 TODO
 
-[ ] Fix zombies when running this command (for example):
-    ls | grep conf | grep config | grep .h | grep .in | wc -l &
 [ ] Builtins
     [x] cd
     [ ] exec
@@ -25,3 +23,5 @@ TODO
     [x] Start commands in the background (eg. somecommand & some | pipe | line &)
     [ ] Chain async comands (a & b & c)
 [ ] Minimal readline-like library/code just for clara
+[x] Fix zombies when running this command (for example):
+    ls | grep conf | grep config | grep .h | grep .in | wc -l &
